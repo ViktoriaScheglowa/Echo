@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="new branch">
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/app/services/connection_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/app/services/websocket.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/main.py" afterDir="false" />
+    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="создание мессенджера">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -83,11 +78,20 @@
       <option name="project" value="LOCAL" />
       <updated>1774535080875</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="создание мессенджера">
+      <option name="closed" value="true" />
+      <created>1774552011302</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774552011302</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="new branch" />
-    <option name="LAST_COMMIT_MESSAGE" value="new branch" />
+    <MESSAGE value="создание мессенджера" />
+    <option name="LAST_COMMIT_MESSAGE" value="создание мессенджера" />
   </component>
 </project>
