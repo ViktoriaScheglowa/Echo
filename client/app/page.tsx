@@ -14,7 +14,7 @@ export default function SentinelsChat() {
 
   useEffect(() => {
     // Подключаемся к твоему Python серверу
-    const socket = new WebSocket('ws://127.0.0.1:8000/ws/user_1');
+    const socket = new WebSocket('ws://localhost:8000/ws/user_1');
     socketRef.current = socket;
 
     socket.onopen = () => setStatus('🛡️ SECURE CONNECTION ESTABLISHED');
@@ -22,32 +22,41 @@ export default function SentinelsChat() {
 
     socket.onmessage = (event) => {
       try {
-        // Расшифровываем то, что пришло от сервера
-        const bytes = CryptoJS.AES.decrypt(event.data, SECRET_KEY);
+        const packet = JSON.parse(event.data); // Распаковываем пакет {senderId, content}
+
+        // Расшифровываем контент
+        const bytes = CryptoJS.AES.decrypt(packet.content, SECRET_KEY);
         const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
 
         if (decryptedText) {
           setMessages(prev => [...prev, {
-            sender: 'Agent-007', // Позже мы научим сервер присылать реальное имя
+            // Если ID отправителя совпадает с моим — пишем 'You', иначе — ID отправителя
+            sender: packet.senderId === myId ? 'You' : packet.senderId,
             text: decryptedText
           }]);
         }
       } catch (e) {
-        console.error("Ошибка при получении данных:", e);
+        console.error("Ошибка обработки пакета:", e);
       }
     };
 
     return () => socket.close();
-  }, []);
+  }, [myId]);
 
     const sendMessage = (e: React.FormEvent) => {
       e.preventDefault();
       if (input && socketRef.current) {
+        // 1. Шифруем только текст сообщения
         const encrypted = CryptoJS.AES.encrypt(input, SECRET_KEY).toString();
-        socketRef.current.send(JSON.stringify({ content: encrypted }));
 
-        // ЭТУ СТРОКУ УДАЛИ ИЛИ ЗАКОММЕНТИРУЙ:
-        // setMessages(prev => [...prev, { sender: 'You', text: input }]);
+        // 2. Формируем "Пакет данных"
+        const messagePacket = {
+          senderId: myId,      // Твой уникальный ID (который мы создали через useState)
+          content: encrypted   // Зашифрованный текст
+        };
+
+        // 3. Отправляем пакет на сервер
+        socketRef.current.send(JSON.stringify(messagePacket));
 
         setInput('');
       }

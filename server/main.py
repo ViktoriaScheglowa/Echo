@@ -28,12 +28,12 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
     try:
         while True:
             data = await websocket.receive_text()
-            message_data = json.loads(data)
-            encrypted_content = message_data.get('content')
+            # message_data = json.loads(data)
+            # encrypted_content = message_data.get('content')
 
             # Раньше было: await websocket.send_text(...)
             # Теперь: отправляем ВСЕМ подключенным
-            await manager.broadcast(encrypted_content)
+            await manager.broadcast(data)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
