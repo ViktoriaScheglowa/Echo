@@ -1,4 +1,6 @@
 "use client";
+import CryptoJS from 'crypto-js';
+
 import { useEffect, useState, useRef } from 'react';
 
 export default function SentinelsChat() {
@@ -6,6 +8,9 @@ export default function SentinelsChat() {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('Connecting...');
   const socketRef = useRef<WebSocket | null>(null);
+
+  const [myId] = useState(() => "User_" + Math.floor(Math.random() * 1000));
+  const SECRET_KEY = "sentinels-alpha-key";
 
   useEffect(() => {
     // Подключаемся к твоему Python серверу
@@ -16,20 +21,37 @@ export default function SentinelsChat() {
     socket.onclose = () => setStatus('❌ DISCONNECTED');
 
     socket.onmessage = (event) => {
-      setMessages(prev => [...prev, { sender: 'System/Echo', text: event.data }]);
+      try {
+        // Расшифровываем то, что пришло от сервера
+        const bytes = CryptoJS.AES.decrypt(event.data, SECRET_KEY);
+        const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+        if (decryptedText) {
+          setMessages(prev => [...prev, {
+            sender: 'Agent-007', // Позже мы научим сервер присылать реальное имя
+            text: decryptedText
+          }]);
+        }
+      } catch (e) {
+        console.error("Ошибка при получении данных:", e);
+      }
     };
 
     return () => socket.close();
   }, []);
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input && socketRef.current) {
-      socketRef.current.send(JSON.stringify({ content: input }));
-      setMessages(prev => [...prev, { sender: 'You', text: input }]);
-      setInput('');
-    }
-  };
+    const sendMessage = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (input && socketRef.current) {
+        const encrypted = CryptoJS.AES.encrypt(input, SECRET_KEY).toString();
+        socketRef.current.send(JSON.stringify({ content: encrypted }));
+
+        // ЭТУ СТРОКУ УДАЛИ ИЛИ ЗАКОММЕНТИРУЙ:
+        // setMessages(prev => [...prev, { sender: 'You', text: input }]);
+
+        setInput('');
+      }
+    };
 
   return (
     <div className="flex flex-col h-screen bg-black text-white font-mono uppercase tracking-widest">

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from app.services.connection_manager import manager
 import json
 
 app = FastAPI(title="Sentinels API", version="0.1.0")
@@ -23,19 +24,19 @@ async def root():
 # WebSocket для чата
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    await websocket.accept()
-    print(f"User {user_id} connected")
+    await manager.connect(websocket)
     try:
         while True:
-            # Ожидаем данные от клиента
             data = await websocket.receive_text()
             message_data = json.loads(data)
+            encrypted_content = message_data.get('content')
 
-            # Логика: просто отправляем сообщение обратно (Echo)
-            # В реальном приложении здесь будет маршрутизация получателю
-            await websocket.send_text(f"Message received: {message_data.get('content')}")
+            # Раньше было: await websocket.send_text(...)
+            # Теперь: отправляем ВСЕМ подключенным
+            await manager.broadcast(encrypted_content)
+
     except WebSocketDisconnect:
-        print(f"User {user_id} disconnected")
+        manager.disconnect(websocket)
 
 if __name__ == "__main__":
     import uvicorn

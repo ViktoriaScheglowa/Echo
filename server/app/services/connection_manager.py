@@ -1,21 +1,27 @@
 from fastapi import WebSocket
 from typing import Dict
 
+
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
+        # Храним активные соединения в списке
+        self.active_connections: list[WebSocket] = []
 
-    async def connect(self, user_id: str, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections[user_id] = websocket
+        self.active_connections.append(websocket)
 
-    def disconnect(self, user_id: str):
-        if user_id in self.active_connections:
-            del self.active_connections[user_id]
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
 
-    async def forward_message(self, payload: dict):
-        recipient_id = payload.get("recipient_id")
-        if recipient_id in self.active_connections:
-            await self.active_connections[recipient_id].send_json(payload)
+    # ЭТОТ МЕТОД РАССЫЛАЕТ ВСЕМ!
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            try:
+                await connection.send_text(message)
+            except Exception:
+                # Если кто-то отвалился, просто пропускаем
+                pass
+
 
 manager = ConnectionManager()
