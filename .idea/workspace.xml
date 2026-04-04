@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="добавлена идентификация">
+    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="сохранение имени пользователя и чата">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +120,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774640395612</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="сохранение имени пользователя и чата">
+      <option name="closed" value="true" />
+      <created>1775158394016</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1775158394016</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -127,6 +136,7 @@
     <MESSAGE value="создание мессенджера" />
     <MESSAGE value="добавлено шифрование" />
     <MESSAGE value="добавлена идентификация" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавлена идентификация" />
+    <MESSAGE value="сохранение имени пользователя и чата" />
+    <option name="LAST_COMMIT_MESSAGE" value="сохранение имени пользователя и чата" />
   </component>
 </project>
