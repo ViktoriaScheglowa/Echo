@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="выбор получателя и уведомления в браузере, офлайн доставка">
+    <list default="true" id="f9658210-be0b-48da-a1e4-b557c097f6e3" name="Changes" comment="списки онлайн, диалоги, статус">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/app/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/main.py" afterDir="false" />
@@ -136,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775302116907</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="списки онлайн, диалоги, статус">
+      <option name="closed" value="true" />
+      <created>1775304930037</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1775304930037</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -146,6 +154,7 @@
     <MESSAGE value="добавлена идентификация" />
     <MESSAGE value="сохранение имени пользователя и чата" />
     <MESSAGE value="выбор получателя и уведомления в браузере, офлайн доставка" />
-    <option name="LAST_COMMIT_MESSAGE" value="выбор получателя и уведомления в браузере, офлайн доставка" />
+    <MESSAGE value="списки онлайн, диалоги, статус" />
+    <option name="LAST_COMMIT_MESSAGE" value="списки онлайн, диалоги, статус" />
   </component>
 </project>
