@@ -1,13 +1,51 @@
 import json
 import uuid
+import asyncpg
+import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List, Dict, Set
+from typing import Dict
 
 app = FastAPI()
 
-# Глобальная история и список пользователей
-message_history: List[Dict[str, str]] = []
-registered_users: Set[str] = set()
+# НАСТРОЙКИ ПОДКЛЮЧЕНИЯ (замените на свои данные)
+DATABASE_URL = "postgresql://postgres:15111983@localhost/messenger"
+
+# Глобальная переменная для пула соединений
+db_pool = None
+
+
+async def init_db():
+    global db_pool
+    # Создаем пул соединений
+    db_pool = await asyncpg.create_pool(DATABASE_URL)
+
+    async with db_pool.acquire() as conn:
+        # Создаем таблицу пользователей
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id TEXT PRIMARY KEY
+            );
+        """)
+        # Создаем таблицу сообщений
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id UUID PRIMARY KEY,
+                sender_id TEXT NOT NULL,
+                recipient_id TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+
+@app.on_event("startup")
+async def startup():
+    await init_db()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await db_pool.close()
 
 
 class ConnectionManager:
@@ -17,16 +55,25 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
         self.active_connections[user_id] = websocket
-        registered_users.add(user_id)
-        await self.update_user_list()
 
-        # Отправляем историю (где пользователь был отправителем или получателем)
-        user_history = [
-            msg for msg in message_history
-            if msg['recipientId'] == user_id or msg['senderId'] == user_id
-        ]
-        for msg in user_history:
-            await websocket.send_json(msg)
+        async with db_pool.acquire() as conn:
+            # Регистрируем пользователя
+            await conn.execute("INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING", user_id)
+
+            # Загружаем историю (используем $1, $2 для защиты от SQL-инъекций)
+            rows = await conn.fetch(
+                "SELECT id, sender_id, recipient_id, content FROM messages WHERE sender_id = $1 OR recipient_id = $1 ORDER BY created_at ASC",
+                user_id
+            )
+            for row in rows:
+                await websocket.send_json({
+                    "id": str(row['id']),
+                    "senderId": row['sender_id'],
+                    "recipientId": row['recipient_id'],
+                    "content": row['content']
+                })
+
+        await self.update_user_list()
 
     def disconnect(self, user_id: str):
         if user_id in self.active_connections:
@@ -34,12 +81,12 @@ class ConnectionManager:
 
     async def update_user_list(self):
         online = list(self.active_connections.keys())
-        all_users = list(registered_users)
-        payload = {
-            "type": "USER_LIST",
-            "online": online,
-            "all": all_users
-        }
+
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("SELECT user_id FROM users")
+            all_users = [row['user_id'] for row in rows]
+
+        payload = {"type": "USER_LIST", "online": online, "all": all_users}
         for connection in self.active_connections.values():
             await connection.send_json(payload)
 
@@ -60,15 +107,16 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
             data = await websocket.receive_text()
             packet = json.loads(data)
 
-            # Присваиваем сообщению уникальный ID
-            packet["id"] = str(uuid.uuid4())
-            message_history.append(packet)
+            msg_id = uuid.uuid4()
+            packet["id"] = str(msg_id)
 
-            # Лимит истории
-            if len(message_history) > 500:
-                message_history.pop(0)
+            # Сохраняем в PostgreSQL
+            async with db_pool.acquire() as conn:
+                await conn.execute(
+                    "INSERT INTO messages (id, sender_id, recipient_id, content) VALUES ($1, $2, $3, $4)",
+                    msg_id, packet['senderId'], packet['recipientId'], packet['content']
+                )
 
-            # Отправляем обоим участникам диалога
             await manager.send_personal_message(packet, packet['recipientId'].lower())
             await manager.send_personal_message(packet, packet['senderId'].lower())
 
